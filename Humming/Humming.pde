@@ -40,8 +40,10 @@ float blueSquareHeight;
 int volumeFactor = 1;
 String saved = "";
 String appDescription = "\"When you can hear the drone circling in the sky, you think it might strike you. We’re always scared. \nWe always have this fear in our head.\""; // http://www.livingunderdrones.org/wp-content/uploads/2013/10/Stanford-NYU-Living-Under-Drones.pdf
-String typingInstructions = "Follow the link below to obtain your own Flickr API key. \nCopy your API Key and press the TAB key to paste. \nPress Enter to Continue.";
+String typingInstructions = "Follow the link below to obtain your own Flickr API key. \nCopy your API Key and press the TAB key to paste. \nThen press Enter to Continue.";
 String flickrLink = "https://www.flickr.com/services/api/misc.api_keys.html";
+String flickrExplanation = "(Click Non-Commercial Key and then fill out the other fields with the word 'test')";
+
 
 boolean overApiButton = false;
 boolean overContinueButton = false;
@@ -72,7 +74,6 @@ PFont fontSmall;
 
 
 void setup() {
-  
   rectMode(CENTER);
   textAlign(CENTER);
   imageMode(CENTER);
@@ -80,8 +81,8 @@ void setup() {
   size(displayWidth,displayHeight);
   blueSquareWidth = width*0.1;
   blueSquareHeight = height*0.45;
-  fontSmall = loadFont("ArialMT-20.vlw");
-  fontLarge = loadFont("Arial-BoldMT-55.vlw");
+  fontSmall = loadFont("Amiri-Regular-20.vlw");
+  fontLarge = loadFont("Amiri-Regular-55.vlw");
 
   makeRedBox();
   
@@ -93,20 +94,13 @@ void setup() {
   json = loadJSONObject("http://api.dronestre.am/data");
   main = json.getJSONArray("strike");
   
-  
   inputX = width*0.5;
   inputY = height*0.5;
   
-  //pageProgression();
   playDrone();
-  
 }
 
 void draw() {
-//  println("initialPage:" + initialPage);
-//  println("typingApiKey:" + typingApiKey);
-//  println("checkingApiKey:" + checkingApiKey);
-//  println("apiKeySuccessful:" + apiKeySuccessful);
 
   background(0);
   pageProgression();
@@ -125,43 +119,56 @@ void draw() {
     drawBlueRect();
     fill(r,g,b);
     text(flickrLink, inputX, inputY+100, 600, 50);
+    fill(255);
+    text(flickrExplanation, inputX, inputY+150, 800, 50);
     fill(255); 
-    text(typing, inputX, inputY, 350, 50);
+    text(typing, inputX, inputY, 370, 50);
     text(typingInstructions, inputX, inputY-100, 600, 150);
   }
   
   if(checkingApiKey==true){
     stroke(0);
     drawBlueRect();
-    fill(255);
-    text("Checking API Key", inputX, inputY, 350, 50);
     checkApiKey();
+    finished = 0;
   }
   
   if(apiKeySuccessful==true){
+    background(0);
     stroke(0);
     drawBlueRect();
-    fill(255);
-    text("API Key Successful", inputX, inputY, 350, 50);
+    if (finished <10){
+      fill(255);
+      text("Checking API Key", inputX, inputY, 350, 50);
+    }
     
-    stroke(200);
+    finished = finished +1;
+    
+    if (finished > 10){     
+      fill(255);
+      text("API Key Successful", inputX, inputY, 350, 50);
+    
+      stroke(200);
       if(overContinueButton){
          fill(255);
       } else {
          fill(0);
       }
-      text("Continue", inputX, inputY+50, 200, 50);
+      text("Continue", inputX, inputY+130, 200, 50);
       rect(inputX, inputY+75, 50, 50);
+      }
     }
   
   if (introQuote == true){
     textFont(fontSmall);
-    text(appDescription, inputX, inputY, 1000, 200);
+    if (finished > 20 && finished < 100){
+      text(appDescription, inputX, inputY, 1000, 200);
+    }
     finished = finished +1;
-    if (finished > 90)
+    if (finished > 110)
     {
-      appRunning = true;
-      introQuote = false;    
+      introQuote = false;
+      appRunning = true;    
     }
   }  
   
@@ -190,7 +197,6 @@ void draw() {
     title = titles.get(whichItem);
 
     image(photo, width*0.65, height*0.45, photo.width*1.4, photo.height*1.4);
-    println(whichItem);
   
     fill(255);
     textFont(fontSmall);
@@ -200,7 +206,6 @@ void draw() {
     int displayItem = whichItem + 1;
   
     text("Strike " + displayItem, width*0.22, height*0.47);
-    println (newGain);
   }
 }
 
@@ -214,7 +219,6 @@ void getMoreData(){
     getStrikeInfo();
     timeDelay();
     addPhoto();
-    println("again");
     }
 
 void getWoeIDFromDrone(){
@@ -249,7 +253,7 @@ void addPhoto(){
     
     photo = loadImage("http://farm"+farm+".static.flickr.com/"+server+"/"+id+"_"+secret+".jpg");
     photos.add(photo);
-    titles.add(title);
+    titles.add("'" + title + "'");
     }
   else{
     photos.add(nonImage);
@@ -271,6 +275,7 @@ void mouseClicked() {
   if (apiKeySuccessful == true && overContinueButton == true) {
     apiKeySuccessful = false;
     introQuote = true;
+    finished = 0;
   }
   
   
@@ -373,7 +378,7 @@ void checkButtons3 () {
 }
 
 void checkButtons4 () {
-  if (mouseX > inputX-300 && mouseX < inputX+300 && mouseY > inputY+50 && mouseY < inputY+100) {
+  if (mouseX > inputX-290 && mouseX < inputX+290 && mouseY > inputY+55 && mouseY < inputY+95) {
     overFlickrLink = true;
     r = 255;
     g = 255;
@@ -409,8 +414,8 @@ boolean timeDelay(){
 }
 
 void drawBlueRect(){
-  fill(0,0,200,50);
-  rect(inputX, inputY-15, 350, 50);
+  fill(0,0,200, 90);
+  rect(inputX, inputY-15, 370, 50);
 }
 
 void pageProgression() {
@@ -464,7 +469,6 @@ void checkApiKey() {
   
   String status = xml.getString("stat");
   String goodStatus = "ok";
-  println(status);
   if (status.equals(goodStatus) == true){
     println("Success Status:" + status);
     apiKeySuccessful = true;
