@@ -27,7 +27,7 @@ int whichItem = 0;
 AudioPlayer droneSound;
 int gain;
 int size;
-float newGain = -50.0;
+float newGain = -35.0;
 int max = 11;
 PImage nonImage;
 String strikeInfo;
@@ -35,11 +35,11 @@ float boxHeight;
 
 int woeID;
 boolean overButton = false;
-float blueSquareWidth;
-float blueSquareHeight;
+float photoButtonX;
+float photoButtonY;
 int volumeFactor = 1;
 String saved = "";
-String appDescription = "\"When you can hear the drone circling in the sky, you think it might strike you. We’re always scared. \nWe always have this fear in our head.\""; // http://www.livingunderdrones.org/wp-content/uploads/2013/10/Stanford-NYU-Living-Under-Drones.pdf
+String quote = "\"When you can hear the drone circling in the sky, you think it might strike you. We’re always scared. \nWe always have this fear in our head.\""; // http://www.livingunderdrones.org/wp-content/uploads/2013/10/Stanford-NYU-Living-Under-Drones.pdf
 String typingInstructions = "Follow the link below to obtain your own Flickr API key. \nCopy your API Key and press the TAB key to paste. \nThen press Enter to Continue.";
 String flickrLink = "https://www.flickr.com/services/api/misc.api_keys.html";
 String flickrExplanation = "(Click Non-Commercial Key and then fill out the other fields with the word 'test')";
@@ -71,6 +71,7 @@ int b;
 String typing = "";
 PFont fontLarge;
 PFont fontSmall;
+int buttonStroke;
 
 
 void setup() {
@@ -79,8 +80,8 @@ void setup() {
   imageMode(CENTER);
   
   size(displayWidth,displayHeight);
-  blueSquareWidth = width*0.1;
-  blueSquareHeight = height*0.45;
+  photoButtonX = width*0.12;
+  photoButtonY = height*0.455;
   fontSmall = loadFont("Amiri-Regular-20.vlw");
   fontLarge = loadFont("Amiri-Regular-55.vlw");
 
@@ -108,6 +109,7 @@ void draw() {
   if (initialPage == true){
     textFont(fontSmall);
     if (overApiButton == true){
+      stroke(buttonStroke);
       drawBlueRect();
     }
     fill(255);
@@ -116,11 +118,12 @@ void draw() {
   }
   
   if (typingApiKey==true){
+    stroke(0);
     drawBlueRect();
     fill(r,g,b);
     text(flickrLink, inputX, inputY+100, 600, 50);
     fill(255);
-    text(flickrExplanation, inputX, inputY+150, 800, 50);
+    text(flickrExplanation, inputX, inputY+130, 800, 50);
     fill(255); 
     text(typing, inputX, inputY, 370, 50);
     text(typingInstructions, inputX, inputY-100, 600, 150);
@@ -161,11 +164,11 @@ void draw() {
   
   if (introQuote == true){
     textFont(fontSmall);
-    if (finished > 20 && finished < 100){
-      text(appDescription, inputX, inputY, 1000, 200);
+    if (finished > 20 && finished < 120){
+      text(quote, inputX, inputY, 1000, 200);
     }
     finished = finished +1;
-    if (finished > 110)
+    if (finished > 130)
     {
       introQuote = false;
       appRunning = true;    
@@ -174,7 +177,7 @@ void draw() {
   
   if(appRunning==true){
     if (loadInitial == true){
-      for (int i = 0; i<5; i++){
+      for (int i = 0; i<10; i++){
         drone = main.getJSONObject(i);
         getWoeIDFromDrone();
         getStrikeInfo();
@@ -192,7 +195,7 @@ void draw() {
       } else {
       noFill();
       }
-    rect(blueSquareWidth, blueSquareHeight, 70, 70);
+    rect(photoButtonX, photoButtonY, 30, 30);
     photo = photos.get(whichItem);
     title = titles.get(whichItem);
 
@@ -213,12 +216,13 @@ void draw() {
 //--------FUNCTIONS----------------------------------------------------
 
 void getMoreData(){
-    drone = main.getJSONObject(whichItem+5);
+    drone = main.getJSONObject(whichItem+10);
     getWoeIDFromDrone();
     //String mySqlDate = convertDateFromDrone(drone);
     getStrikeInfo();
     timeDelay();
     addPhoto();
+    println(photos.size());
     }
 
 void getWoeIDFromDrone(){
@@ -261,6 +265,12 @@ void addPhoto(){
   }
 }
 
+void mousePressed() {
+  if (initialPage == true && overApiButton == true) {
+    buttonStroke = 255;
+  } 
+}
+
 
 void mouseClicked() {
   if (initialPage == true && overApiButton == true) {
@@ -293,7 +303,7 @@ void mouseClicked() {
         volumeFactor ++;
       }
       if (gainTitle == "No images uploaded to Flickr at this location"){
-        newGain = newGain + 0.5*volumeFactor; 
+        newGain = newGain + 0.4*volumeFactor; 
         volumeFactor = 0;       
         }
        gainTitle = "";
@@ -318,7 +328,9 @@ void keyPressed() {
           typing = typing.substring(0,max(0,typing.length()-1));
           break;
         case TAB:
-         typing = GetTextFromClipboard();
+          if (typingApiKey == true) {
+           typing = GetTextFromClipboard();
+          }
          break;
         case ENTER:
         case RETURN:
@@ -353,7 +365,7 @@ void mouseDragged() {
 
 
 void checkButtons() {
-  if (mouseX > blueSquareWidth-35 && mouseX < blueSquareWidth+35 && mouseY > blueSquareHeight-35 && mouseY < blueSquareHeight + 35) {
+  if (mouseX > photoButtonX-15 && mouseX < photoButtonX+15 && mouseY > photoButtonY-15 && mouseY < photoButtonY+15) {
     overButton = true;   
   } 
   else {
@@ -514,7 +526,7 @@ Object GetFromClipboard(DataFlavor flavor)
  {
  obj = contents.getTransferData(flavor);
  }
- catch (UnsupportedFlavorException exu) // Unlikely but we must catch it
+ catch (UnsupportedFlavorException exu)
  {
  println("Unsupported flavor: " + exu);
 //~ exu.printStackTrace();
